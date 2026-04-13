@@ -4,7 +4,7 @@ const { Octokit } = require('@octokit/rest');
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 const owner = 'napolsg';
-const repo  = 'taskmail';
+const repo  = 'taskmail-MA';
 
 async function getTasks() {
   const { data } = await octokit.repos.getContent({ owner, repo, path: 'tasks.json' });
