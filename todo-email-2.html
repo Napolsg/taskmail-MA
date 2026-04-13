@@ -412,7 +412,7 @@ html, body {
   <div class="header-top">
     <div style="display:flex; align-items:baseline; gap:8px;">
       <div class="app-title">TaskMail</div>
-      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v2.5</span>
+      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v2.6</span>
     </div>
     <div class="header-actions">
       <button class="hbtn" onclick="openSettings()">⚙️</button>
@@ -455,6 +455,14 @@ html, body {
     </select>
     <input class="add-sel" type="text" id="new-project" placeholder="Projet…" style="font-size:0.82rem; flex:1; min-width:0;">
     <select class="add-sel" id="new-assignee" style="font-size:0.82rem; flex:1; min-width:0;" onchange="onAssigneeChange(this)"></select>
+  </div>
+  <div id="add-bar-contact-form" style="display:none; flex-direction:column; gap:6px; margin-top:8px; padding:10px 12px; background:white; border-radius:10px; border:1px solid #E8E8E4;">
+    <div style="font-size:0.75rem; font-weight:600; color:#6C6C68; margin-bottom:2px;">Nouveau contact</div>
+    <div style="display:flex; gap:6px;">
+      <input type="text" id="add-contact-name" placeholder="Nom" style="flex:1; background:#F2F2F7; border:1px solid #E8E8E4; border-radius:8px; padding:8px 10px; font-size:0.82rem; color:#1C1C1E; outline:none;">
+      <input type="email" id="add-contact-email" placeholder="Email" style="flex:2; background:#F2F2F7; border:1px solid #E8E8E4; border-radius:8px; padding:8px 10px; font-size:0.82rem; color:#1C1C1E; outline:none;">
+    </div>
+    <button onclick="saveNewContact()" style="background:#1C1C1E; color:white; border:none; border-radius:8px; padding:9px; font-size:0.82rem; font-weight:700; cursor:pointer;">Ajouter le contact</button>
   </div>
 </div>
 
@@ -1023,32 +1031,52 @@ function populateAssigneeSelects() {
 }
 
 function onAssigneeChange(sel) {
-  const form = document.getElementById('new-contact-form');
-  if (!sel || !form) return;
+  if (!sel) return;
+  // Formulaire dans la feuille d'édition
+  const editForm = document.getElementById('new-contact-form');
+  // Formulaire dans la barre d'ajout
+  const addForm  = document.getElementById('add-bar-contact-form');
+
   if (sel.value === '__new__') {
-    form.style.display = 'flex';
-    form.style.flexDirection = 'column';
-    // Stocke quel select a déclenché pour savoir où mettre le résultat
-    form.dataset.triggeredBy = sel.id;
+    if (sel.id === 'new-assignee' && addForm) {
+      addForm.style.display = 'flex';
+      addForm.style.flexDirection = 'column';
+      addForm.dataset.triggeredBy = sel.id;
+      if (editForm) editForm.style.display = 'none';
+    } else if (editForm) {
+      editForm.style.display = 'flex';
+      editForm.style.flexDirection = 'column';
+      editForm.dataset.triggeredBy = sel.id;
+      if (addForm) addForm.style.display = 'none';
+    }
   } else {
-    form.style.display = 'none';
+    if (editForm) editForm.style.display = 'none';
+    if (addForm)  addForm.style.display  = 'none';
   }
 }
 
 function saveNewContact() {
-  const name  = (document.getElementById('contact-name')?.value || '').trim();
-  const email = (document.getElementById('contact-email')?.value || '').trim();
+  // Lit depuis le formulaire visible (barre d'ajout ou feuille d'édition)
+  const addForm  = document.getElementById('add-bar-contact-form');
+  const fromAdd  = addForm && addForm.style.display !== 'none';
+  const nameId   = fromAdd ? 'add-contact-name'  : 'contact-name';
+  const emailId  = fromAdd ? 'add-contact-email' : 'contact-email';
+  const name  = (document.getElementById(nameId)?.value  || '').trim();
+  const email = (document.getElementById(emailId)?.value || '').trim();
   if (!name || !email) { toast('Nom et email requis', 'err'); return; }
   if (contacts.find(c => c.email === email)) { toast('Contact déjà existant', 'info'); return; }
   contacts.push({ name, email });
   saveContacts();
   populateAssigneeSelects();
   // Sélectionne le nouveau contact dans le bon select
-  const form = document.getElementById('new-contact-form');
-  const triggeredBy = form?.dataset.triggeredBy || 'e-assignee';
+  const editForm2 = document.getElementById('new-contact-form');
+  const addForm2  = document.getElementById('add-bar-contact-form');
+  const fromAdd2  = addForm2 && addForm2.style.display !== 'none';
+  const triggeredBy = fromAdd2 ? (addForm2.dataset.triggeredBy || 'new-assignee') : (editForm2?.dataset.triggeredBy || 'e-assignee');
   const sel = document.getElementById(triggeredBy);
   if (sel) sel.value = email;
-  if (form) form.style.display = 'none';
+  if (editForm2) editForm2.style.display = 'none';
+  if (addForm2)  addForm2.style.display  = 'none';
   toast('Contact ' + name + ' ajouté', 'ok');
 }
 
