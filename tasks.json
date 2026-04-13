@@ -59,7 +59,7 @@
     "title": "Faire une tache",
     "priority": "medium",
     "project": "",
-    "done": false,
+    "done": true,
     "created": "2026-04-13T10:00:18.083Z",
     "assignee": "",
     "assigneeRef": "",
