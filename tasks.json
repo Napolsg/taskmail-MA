@@ -9,38 +9,6 @@
       "created": "2026-04-13T16:21:42.436Z"
     },
     {
-      "id": 1776097302436.5366,
-      "title": "*Marie-Alix de Lassus*",
-      "priority": "medium",
-      "project": "",
-      "done": true,
-      "created": "2026-04-13T16:21:42.436Z"
-    },
-    {
-      "id": 1776097302436.8184,
-      "title": "Tel: 06 60 17 78 02",
-      "priority": "medium",
-      "project": "",
-      "done": true,
-      "created": "2026-04-13T16:21:42.436Z"
-    },
-    {
-      "id": 1776097302436.6404,
-      "title": "LinkedIn:  <https://www.linkedin.com/feed/> Marie-Alix de Lassus",
-      "priority": "medium",
-      "project": "",
-      "done": true,
-      "created": "2026-04-13T16:21:42.436Z"
-    },
-    {
-      "id": 1776097302436.953,
-      "title": "<https://www.linkedin.com/in/marie-alix-de-lassus-de-lanouvelle-9469b743/>",
-      "priority": "medium",
-      "project": "",
-      "done": true,
-      "created": "2026-04-13T16:21:42.436Z"
-    },
-    {
       "id": 1776094941163,
       "title": "Être gentille",
       "priority": "high",
@@ -62,6 +30,10 @@
     }
   ],
   "deletedIds": [
-    "1776089241327"
+    "1776089241327",
+    "1776097302436.5366",
+    "1776097302436.8184",
+    "1776097302436.6404",
+    "1776097302436.953"
   ]
 }
