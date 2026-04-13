@@ -530,11 +530,8 @@ let editingId = null;
 let lastMin   = null;
 
 async function init() {
-  if (config.service)  document.getElementById('ejs-service').value  = config.service;
-  if (config.template) document.getElementById('ejs-template').value = config.template;
-  if (config.pubkey)   { document.getElementById('ejs-pubkey').value = config.pubkey; try { emailjs.init(config.pubkey); } catch(e){} }
-  if (config.to)       document.getElementById('ejs-to').value       = config.to;
-  if (config.ghToken)  document.getElementById('gh-token').value     = config.ghToken;
+  if (config.to && document.getElementById('ejs-to'))       document.getElementById('ejs-to').value       = config.to;
+  if (config.ghToken && document.getElementById('gh-token')) document.getElementById('gh-token').value = config.ghToken;
 
   // Affiche la liste immédiatement
   render();
@@ -644,15 +641,12 @@ function checkSchedules() {
 function updateNextSend() { /* désactivé */ }
 
 function saveConfig() {
+  const getVal = id => { const el = document.getElementById(id); return el ? el.value.trim() : (config[id.replace('ejs-','').replace('-','T').replace('gh-token','ghToken')] || ''); };
   config = {
-    service:  document.getElementById('ejs-service').value.trim(),
-    template: document.getElementById('ejs-template').value.trim(),
-    pubkey:   document.getElementById('ejs-pubkey').value.trim(),
-    to:       document.getElementById('ejs-to').value.trim(),
-    ghToken:  document.getElementById('gh-token').value.trim(),
+    to:      document.getElementById('ejs-to')   ? document.getElementById('ejs-to').value.trim()   : (config.to || ''),
+    ghToken: document.getElementById('gh-token') ? document.getElementById('gh-token').value.trim() : (config.ghToken || ''),
   };
   localStorage.setItem('tm3_config', JSON.stringify(config));
-  if (config.pubkey) try { emailjs.init(config.pubkey); } catch(e) {}
   toast('Configuration sauvegardée', 'ok');
 }
 
