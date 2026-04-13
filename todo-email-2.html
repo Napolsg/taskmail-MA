@@ -538,14 +538,7 @@ async function init() {
   await syncFromGitHub(true);
   if (ind) ind.style.display = 'none';
 
-  if (!tasks.length) {
-    tasks = [
-      { id:1, title:'Revoir le rapport mensuel',   priority:'high',   project:'Finance',    done:false, created:new Date().toISOString() },
-      { id:2, title:'Appeler le client principal',  priority:'medium', project:'Commercial', done:false, created:new Date().toISOString() },
-      { id:3, title:'Préparer slides réunion',      priority:'low',    project:'',           done:true,  created:new Date().toISOString() },
-    ];
-    save();
-  }
+  // Pas de tâches par défaut
 
   setInterval(tickClock, 1000);
   setInterval(checkSchedules, 15000);
@@ -567,7 +560,7 @@ async function triggerFetchTasks() {
   localStorage.setItem('tm3_last_trigger', String(now));
 
   try {
-    await fetch('https://api.github.com/repos/napolsg/taskmail-2/actions/workflows/fetch-tasks.yml/dispatches', {
+    await fetch('https://api.github.com/repos/napolsg/taskmail-MA/actions/workflows/fetch-tasks.yml/dispatches', {
       method: 'POST',
       headers: {
         'Authorization': `token ${config.ghToken}`,
@@ -585,7 +578,7 @@ async function triggerFetchTasks() {
 async function syncFromGitHub(notify = false) {
   if (!config.ghToken) return;
   try {
-    const url = 'https://api.github.com/repos/napolsg/taskmail-2/contents/tasks.json';
+    const url = 'https://api.github.com/repos/napolsg/taskmail-MA/contents/tasks.json';
     const res = await fetch(url, {
       headers: {
         'Authorization': `token ${config.ghToken}`,
@@ -796,7 +789,7 @@ function save() {
 async function syncToGitHub() {
   if (!config.ghToken) return;
   const owner = 'napolsg';
-  const repo  = 'taskmail-2';
+  const repo  = 'taskmail-MA';
   const path  = 'tasks.json';
   const url   = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
