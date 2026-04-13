@@ -1,14 +1,13 @@
 [
   {
-    "id": 1776075449758.3728,
-    "title": "Changer ci",
+    "id": 1776086437996,
+    "title": "kjkdjskd",
     "priority": "medium",
     "project": "",
+    "assignee": "taskmail",
+    "assigneeRef": "__contact_0__",
     "done": false,
-    "created": "2026-04-13T10:17:29.758Z",
-    "assignee": "",
-    "assigneeRef": "",
-    "assignedBy": "taskmail"
+    "created": "2026-04-13T13:20:37.996Z"
   },
   {
     "id": 1776077015266.6455,
@@ -45,10 +44,10 @@
     "title": "zdzd",
     "priority": "medium",
     "project": "",
-    "assignee": "",
+    "assignee": "taskmail",
     "done": false,
     "created": "2026-04-13T12:23:29.666Z",
-    "assigneeRef": ""
+    "assigneeRef": "__contact_0__"
   },
   {
     "id": 1776082887641,
