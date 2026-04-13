@@ -412,7 +412,7 @@ html, body {
   <div class="header-top">
     <div style="display:flex; align-items:baseline; gap:8px;">
       <div class="app-title">TaskMail</div>
-      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.0</span>
+      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.1</span>
     </div>
     <div class="header-actions">
       <button class="hbtn" onclick="openSettings()">⚙️</button>
@@ -524,6 +524,9 @@ window.emailjs = { init:function(){}, send:function(){ return Promise.reject({te
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" onerror="console.warn('EmailJS CDN indisponible')"></script>
 <script>
+const owner = 'napolsg';
+const repo  = 'taskmail-MA';
+
 let tasks     = JSON.parse(localStorage.getItem('tm3_tasks')     || '[]');
 let schedules = JSON.parse(localStorage.getItem('tm3_schedules') || '["08:00","18:00"]');
 let config    = JSON.parse(localStorage.getItem('tm3_config')    || '{}');
@@ -794,8 +797,6 @@ function save() {
 
 async function syncToGitHub() {
   if (!config.ghToken) return;
-  const owner = 'napolsg';
-  const repo  = 'taskmail-MA';
   const path  = 'tasks.json';
   const url   = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
