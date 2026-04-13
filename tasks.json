@@ -21,7 +21,7 @@
       "title": "Tel: 06 60 17 78 02",
       "priority": "medium",
       "project": "",
-      "done": false,
+      "done": true,
       "created": "2026-04-13T16:21:42.436Z"
     },
     {
@@ -61,5 +61,7 @@
       "created": "2026-04-13T14:33:14.929Z"
     }
   ],
-  "deletedIds": []
+  "deletedIds": [
+    "1776089241327"
+  ]
 }
