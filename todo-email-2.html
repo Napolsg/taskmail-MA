@@ -412,7 +412,7 @@ html, body {
   <div class="header-top">
     <div style="display:flex; align-items:baseline; gap:8px;">
       <div class="app-title">TaskMail</div>
-      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.2</span>
+      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.3</span>
     </div>
     <div class="header-actions">
       <button class="hbtn" onclick="openSettings()">⚙️</button>
@@ -575,7 +575,7 @@ async function triggerFetchTasks() {
     await fetch('https://api.github.com/repos/napolsg/taskmail-MA/actions/workflows/fetch-tasks.yml/dispatches', {
       method: 'POST',
       headers: {
-        'Authorization': 'token ' + config.ghToken,
+        'Authorization': 'token ' + sanitize(config.ghToken),
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json'
       },
@@ -593,7 +593,7 @@ async function syncFromGitHub(notify = false) {
     const url = 'https://api.github.com/repos/napolsg/taskmail-MA/contents/tasks.json';
     const res = await fetch(url, {
       headers: {
-        'Authorization': 'token ' + config.ghToken,
+        'Authorization': 'token ' + sanitize(config.ghToken),
         'Accept': 'application/vnd.github.v3+json'
       }
     });
@@ -646,11 +646,15 @@ function checkSchedules() {
 
 function updateNextSend() { /* désactivé */ }
 
+function sanitize(str) {
+  // Garde uniquement les caractères ASCII valides pour les headers HTTP
+  return (str || '').replace(/[^ -~]/g, '').trim();
+}
+
 function saveConfig() {
-  const getVal = id => { const el = document.getElementById(id); return el ? el.value.trim() : (config[id.replace('ejs-','').replace('-','T').replace('gh-token','ghToken')] || ''); };
   config = {
-    to:      document.getElementById('ejs-to')   ? document.getElementById('ejs-to').value.trim()   : (config.to || ''),
-    ghToken: document.getElementById('gh-token') ? document.getElementById('gh-token').value.trim() : (config.ghToken || ''),
+    to:      sanitize(document.getElementById('ejs-to')   ? document.getElementById('ejs-to').value   : (config.to || '')),
+    ghToken: sanitize(document.getElementById('gh-token') ? document.getElementById('gh-token').value : (config.ghToken || '')),
   };
   localStorage.setItem('tm3_config', JSON.stringify(config));
   toast('Configuration sauvegardée', 'ok');
@@ -804,7 +808,7 @@ async function syncToGitHub() {
     // Get current file SHA
     const getRes = await fetch(url, {
       headers: {
-        'Authorization': 'token ' + config.ghToken,
+        'Authorization': 'token ' + sanitize(config.ghToken),
         'Accept': 'application/vnd.github.v3+json'
       }
     });
@@ -816,7 +820,7 @@ async function syncToGitHub() {
     await fetch(url, {
       method: 'PUT',
       headers: {
-        'Authorization': 'token ' + config.ghToken,
+        'Authorization': 'token ' + sanitize(config.ghToken),
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json'
       },
@@ -894,7 +898,7 @@ async function loadSchedules() {
   try {
     const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
     const res = await fetch(url, {
-      headers: { 'Authorization': 'token ' + config.ghToken, 'Accept': 'application/vnd.github.v3+json' }
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' }
     });
     if (!res.ok) return;
     const data = await res.json();
@@ -910,7 +914,7 @@ async function saveSchedules() {
   try {
     const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
     const getRes = await fetch(url, {
-      headers: { 'Authorization': 'token ' + config.ghToken, 'Accept': 'application/vnd.github.v3+json' }
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' }
     });
     const getData = await getRes.json();
     const content = Buffer ? 
@@ -918,7 +922,7 @@ async function saveSchedules() {
       btoa(unescape(encodeURIComponent(JSON.stringify({ schedules: remoteSchedules }, null, 2))));
     await fetch(url, {
       method: 'PUT',
-      headers: { 'Authorization': 'token ' + config.ghToken, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: 'TaskMail: mise à jour des horaires', content, sha: getData.sha })
     });
     toast('Horaires sauvegardés', 'ok');
