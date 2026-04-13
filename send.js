@@ -40,7 +40,7 @@ const priorityOrder = { high: 0, medium: 1, low: 2 };
 const pLabel = { high: 'Urgent', medium: 'Moyen', low: 'Faible' };
 const pColor = { high: '#A32D2D', medium: '#854F0B', low: '#3B6D11' };
 const pBg    = { high: '#FCEBEB', medium: '#FAEEDA', low: '#EAF3DE' };
-const APP_URL = process.env.APP_URL || 'https://napolsg.github.io/taskmail/todo-email.html';
+const APP_URL = process.env.APP_URL || 'https://napolsg.github.io/taskmail-MA/todo-email-2.html';
 
 const dateStr = now.toLocaleString('fr-FR', {
   weekday: 'long', day: 'numeric', month: 'long',
