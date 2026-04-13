@@ -1,10 +1,19 @@
 [
   {
+    "id": 1776083009666,
+    "title": "zdzd",
+    "priority": "medium",
+    "project": "",
+    "assignee": "",
+    "done": false,
+    "created": "2026-04-13T12:23:29.666Z"
+  },
+  {
     "id": 1776082887641,
     "title": "Test",
     "priority": "medium",
     "project": "",
-    "assignee": "",
+    "assignee": "l.lassus87@gmail.com",
     "done": false,
     "created": "2026-04-13T12:21:27.641Z"
   }
