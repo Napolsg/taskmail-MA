@@ -44,9 +44,9 @@
     "title": "Test",
     "priority": "medium",
     "project": "",
-    "assignee": "taskmail",
+    "assignee": "",
     "done": false,
     "created": "2026-04-13T12:21:27.641Z",
-    "assigneeRef": "__contact_0__"
+    "assigneeRef": ""
   }
 ]
