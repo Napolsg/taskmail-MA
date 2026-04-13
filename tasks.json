@@ -71,7 +71,7 @@
     "priority": "medium",
     "project": "",
     "assignee": "",
-    "done": false,
+    "done": true,
     "created": "2026-04-13T12:21:27.641Z",
     "assigneeRef": "__me__"
   }
