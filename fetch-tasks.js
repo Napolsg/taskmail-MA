@@ -68,7 +68,7 @@ function readEmails() {
                 const subject = (mail.subject || '').trim();
                 if (subject.length > 0) return;
 
-                const text = mail.text || '';
+                const text = mail.text || '';console.log('TEXTE BRUT:', JSON.stringify(text.substring(0, 300)));
                 // Prend uniquement le corps principal (ignore les parties citées)
                 const body = text.split(/^>.*$/m)[0];
 
