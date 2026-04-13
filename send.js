@@ -2,7 +2,38 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 
 const tasks = JSON.parse(fs.readFileSync('tasks.json', 'utf8'));
+const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 const pending = tasks.filter(t => !t.done);
+
+// Vérifie si c'est l'heure d'envoyer
+const now = new Date();
+const hhmm = now.getUTCHours().toString().padStart(2,'0') + ':' + now.getUTCMinutes().toString().padStart(2,'0');
+
+// Convertit les horaires locaux (Paris) en UTC
+function toUTC(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const offset = isDST() ? 2 : 1; // UTC+2 été, UTC+1 hiver
+  let utcH = h - offset;
+  if (utcH < 0) utcH += 24;
+  return utcH.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0');
+}
+
+function isDST() {
+  const jan = new Date(now.getFullYear(), 0, 1).getTimezoneOffset();
+  const jul = new Date(now.getFullYear(), 6, 1).getTimezoneOffset();
+  return now.getTimezoneOffset() < Math.max(jan, jul);
+}
+
+const schedulesUTC = (config.schedules || []).map(toUTC);
+const shouldSend = schedulesUTC.some(s => {
+  const [h, m] = s.split(':').map(Number);
+  return now.getUTCHours() === h && now.getUTCMinutes() < 15; // fenêtre de 15 min
+});
+
+if (!shouldSend && process.env.FORCE !== 'true') {
+  console.log(`Pas l'heure d'envoyer (${hhmm} UTC, horaires : ${schedulesUTC.join(', ')})`);
+  process.exit(0);
+}
 
 if (pending.length === 0) {
   console.log('Aucune tâche en attente, email non envoyé.');
@@ -13,10 +44,10 @@ const priorityOrder = { high: 0, medium: 1, low: 2 };
 const sorted = [...pending].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
 const pLabel = { high: 'Urgent', medium: 'Moyen', low: 'Faible' };
-const pColor = { high: '#FF3B30', medium: '#FF9500', low: '#34C759' };
-const pBg    = { high: '#FFF0EF', medium: '#FFF8EF', low: '#F0FFF4' };
+const pColor = { high: '#A32D2D', medium: '#854F0B', low: '#3B6D11' };
+const pBg    = { high: '#FCEBEB', medium: '#FAEEDA', low: '#EAF3DE' };
 
-const APP_URL = 'https://napolsg.github.io/taskmail/todo-email.html';
+const APP_URL = 'https://napolsg.github.io/taskmail-MA/todo-email-2.html';
 
 const taskRows = sorted.map(t => `
   <tr>
@@ -39,8 +70,9 @@ const taskRows = sorted.map(t => `
   </tr>
 `).join('');
 
-const now = new Date().toLocaleString('fr-FR', {
-  weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+const dateStr = now.toLocaleString('fr-FR', {
+  weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
+  timeZone: 'Europe/Paris'
 });
 
 const html = `
@@ -51,78 +83,39 @@ const html = `
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F2F2F7; padding:32px 16px;">
     <tr><td>
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px; margin:0 auto;">
-
-        <!-- HEADER -->
         <tr>
-          <td style="
-            background:linear-gradient(135deg,#007AFF,#5B5EA6);
-            border-radius:16px 16px 0 0;
-            padding:24px 28px;
-          ">
-            <div style="font-size:22px; font-weight:800; color:white; letter-spacing:-0.5px;">TaskMail</div>
-            <div style="font-size:13px; color:rgba(255,255,255,0.8); margin-top:4px;">${now}</div>
+          <td style="background:#185FA5; border-radius:16px 16px 0 0; padding:24px 28px 0;">
+            <div style="font-size:22px; font-weight:800; color:#E6F1FB;">TaskMail</div>
+            <div style="font-size:13px; color:#85B7EB; margin-top:4px; padding-bottom:20px;">${dateStr}</div>
           </td>
         </tr>
-
-        <!-- SUMMARY -->
         <tr>
-          <td style="background:#007AFF; padding:0 28px 20px;">
-            <div style="
-              background:rgba(255,255,255,0.15);
-              border-radius:10px;
-              padding:12px 16px;
-              display:inline-block;
-            ">
-              <span style="font-size:28px; font-weight:800; color:white;">${pending.length}</span>
-              <span style="font-size:14px; color:rgba(255,255,255,0.85); margin-left:6px;">tâche${pending.length > 1 ? 's' : ''} en attente</span>
+          <td style="background:#185FA5; padding:0 28px 20px;">
+            <div style="background:rgba(255,255,255,0.15); border-radius:10px; padding:12px 16px; display:inline-block;">
+              <span style="font-size:28px; font-weight:800; color:#E6F1FB;">${pending.length}</span>
+              <span style="font-size:14px; color:#B5D4F4; margin-left:6px;">tâche${pending.length > 1 ? 's' : ''} en attente</span>
             </div>
           </td>
         </tr>
-
-        <!-- TASKS -->
         <tr>
           <td style="background:white; padding:0;">
-            <table width="100%" cellpadding="0" cellspacing="0">
-              ${taskRows}
-            </table>
+            <table width="100%" cellpadding="0" cellspacing="0">${taskRows}</table>
           </td>
         </tr>
-
-        <!-- FOOTER -->
         <tr>
-          <td style="
-            background:white;
-            border-top:1px solid #F2F2F7;
-            border-radius:0 0 16px 16px;
-            padding:16px 28px;
-            text-align:center;
-          ">
-            <a href="${APP_URL}" style="
-              display:inline-block;
-              background:#007AFF;
-              color:white;
-              text-decoration:none;
-              padding:10px 24px;
-              border-radius:20px;
-              font-size:14px;
-              font-weight:700;
-            ">Ouvrir TaskMail →</a>
+          <td style="background:white; border-top:1px solid #F2F2F7; border-radius:0 0 16px 16px; padding:16px 28px; text-align:center;">
+            <a href="${APP_URL}" style="display:inline-block; background:#185FA5; color:#E6F1FB; text-decoration:none; padding:10px 24px; border-radius:20px; font-size:14px; font-weight:700;">Ouvrir TaskMail →</a>
           </td>
         </tr>
-
       </table>
     </td></tr>
   </table>
 </body>
-</html>
-`;
+</html>`;
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASSWORD,
-  }
+  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASSWORD }
 });
 
 transporter.sendMail({
