@@ -19,17 +19,9 @@
       "assigneeRef": "__contact_0__",
       "done": false,
       "created": "2026-04-13T14:33:14.929Z"
-    },
-    {
-      "id": 1776089241327,
-      "title": "Coucou",
-      "priority": "medium",
-      "project": "",
-      "assignee": "taskmail",
-      "assigneeRef": "__contact_0__",
-      "done": true,
-      "created": "2026-04-13T14:07:21.327Z"
     }
   ],
-  "deletedIds": []
+  "deletedIds": [
+    "1776089241327"
+  ]
 }
