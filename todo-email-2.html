@@ -18,7 +18,7 @@ html, body {
   margin: 0 auto;
 }
 
-/* ── HEADER ── */
+/* -- HEADER -- */
 .header {
   padding: 20px 20px 12px;
   background: linear-gradient(135deg, #007AFF 0%, #5B5EA6 100%);
@@ -56,7 +56,7 @@ html, body {
 
 
 
-/* ── FILTERS ── */
+/* -- FILTERS -- */
 .filters {
   display: flex;
   gap: 7px;
@@ -84,7 +84,7 @@ html, body {
 
 
 
-/* ── TASK LIST ── */
+/* -- TASK LIST -- */
 .task-list {
   padding: 0 20px 140px;
   display: flex;
@@ -99,7 +99,7 @@ html, body {
   margin-bottom: 10px;
 }
 
-/* ── TASK ROW ── */
+/* -- TASK ROW -- */
 .task-row {
   display: flex;
   align-items: center;
@@ -167,7 +167,7 @@ html, body {
 }
 .edit-btn:active { background: #E5E5EA; color: #007AFF; }
 
-/* ── EMPTY ── */
+/* -- EMPTY -- */
 .empty {
   text-align: center;
   padding: 60px 20px;
@@ -177,7 +177,7 @@ html, body {
 .empty-title { font-size: 1rem; font-weight: 600; color: #3C3C43; margin-bottom: 4px; }
 .empty-sub { font-size: 0.82rem; }
 
-/* ── ADD BAR ── */
+/* -- ADD BAR -- */
 .add-bar {
   position: fixed;
   bottom: 0;
@@ -233,7 +233,7 @@ html, body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.07);
 }
 
-/* ── BOTTOM SHEET ── */
+/* -- BOTTOM SHEET -- */
 .overlay {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.3);
@@ -374,7 +374,7 @@ html, body {
 .log-r.sim  { color: #FF9500; }
 .log-r.err  { color: #FF3B30; }
 
-/* ── EDIT SHEET ── */
+/* -- EDIT SHEET -- */
 .edit-sel {
   background: transparent; border: none;
   font-family: 'Outfit', sans-serif; font-size: 0.92rem;
@@ -382,7 +382,7 @@ html, body {
   appearance: none; -webkit-appearance: none;
 }
 
-/* ── TOAST ── */
+/* -- TOAST -- */
 #toasts {
   position: fixed; top: 60px;
   left: 50%; transform: translateX(-50%);
@@ -412,7 +412,7 @@ html, body {
   <div class="header-top">
     <div style="display:flex; align-items:baseline; gap:8px;">
       <div class="app-title">TaskMail</div>
-      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.1</span>
+      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.2</span>
     </div>
     <div class="header-actions">
       <button class="hbtn" onclick="openSettings()">⚙️</button>
@@ -575,7 +575,7 @@ async function triggerFetchTasks() {
     await fetch('https://api.github.com/repos/napolsg/taskmail-MA/actions/workflows/fetch-tasks.yml/dispatches', {
       method: 'POST',
       headers: {
-        'Authorization': `token ${config.ghToken}`,
+        'Authorization': 'token ' + config.ghToken,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json'
       },
@@ -593,7 +593,7 @@ async function syncFromGitHub(notify = false) {
     const url = 'https://api.github.com/repos/napolsg/taskmail-MA/contents/tasks.json';
     const res = await fetch(url, {
       headers: {
-        'Authorization': `token ${config.ghToken}`,
+        'Authorization': 'token ' + config.ghToken,
         'Accept': 'application/vnd.github.v3+json'
       }
     });
@@ -662,35 +662,35 @@ function sendMailto() {
   const pending = tasks.filter(t => !t.done);
   if (!pending.length) { toast('Aucune tâche en attente', 'info'); return; }
   const pLabel = { high:'URGENT', medium:'Moyen', low:'Faible' };
-  const lines  = pending.map((t,i) => `${i+1}. [${pLabel[t.priority]}] ${t.title}${t.project?' — '+t.project:''}`).join('\n');
+  const lines  = pending.map((t,i) => `${i+1}. [${pLabel[t.priority]}] ${t.title}${t.project?' -- '+t.project:''}`).join('\n');
   const timeStr = new Date().toLocaleString('fr-FR');
-  const subject = encodeURIComponent(`TaskMail — ${pending.length} tâche(s) à faire`);
-  const body    = encodeURIComponent(`Bonjour,\n\nVos tâches du ${timeStr} :\n\n${lines}\n\n— TaskMail`);
+  const subject = encodeURIComponent(`TaskMail -- ${pending.length} tâche(s) à faire`);
+  const body    = encodeURIComponent(`Bonjour,\n\nVos tâches du ${timeStr} :\n\n${lines}\n\n-- TaskMail`);
   const a = document.createElement('a');
   a.href = `mailto:${to}?subject=${subject}&body=${body}`;
   document.body.appendChild(a);
   a.click();
   setTimeout(() => document.body.removeChild(a), 200);
   addLog({ time: timeStr, status:'sent', count: pending.length });
-  toast(`Email préparé — ${pending.length} tâche(s)`, 'ok');
+  toast(`Email préparé -- ${pending.length} tâche(s)`, 'ok');
 }
 
 async function sendEmail(mode) {
   const pending = tasks.filter(t => !t.done);
   if (!pending.length) { if (mode !== 'auto') toast('Aucune tâche en attente', 'info'); return; }
   const pLabel = { high:'URGENT', medium:'Moyen', low:'Faible' };
-  const lines  = pending.map((t,i) => `${i+1}. [${pLabel[t.priority]}] ${t.title}${t.project?' — '+t.project:''}`).join('\n');
+  const lines  = pending.map((t,i) => `${i+1}. [${pLabel[t.priority]}] ${t.title}${t.project?' -- '+t.project:''}`).join('\n');
   const timeStr = new Date().toLocaleString('fr-FR');
   if (!config.service || !config.template || !config.pubkey || !config.to) {
     addLog({ time:timeStr, status:'sim', count:pending.length });
-    if (mode !== 'auto') toast('Mode simulation — configurez EmailJS', 'info');
+    if (mode !== 'auto') toast('Mode simulation -- configurez EmailJS', 'info');
     return;
   }
   try {
     await emailjs.send(config.service, config.template, {
       to_email:config.to, send_time:timeStr,
       task_count:pending.length, task_list:lines,
-      subject:`TaskMail — ${pending.length} tâche(s) à faire`,
+      subject:`TaskMail -- ${pending.length} tâche(s) à faire`,
     });
     addLog({ time:timeStr, status:'sent', count:pending.length });
     toast(`Email envoyé (${pending.length} tâches)`, 'ok');
@@ -804,7 +804,7 @@ async function syncToGitHub() {
     // Get current file SHA
     const getRes = await fetch(url, {
       headers: {
-        'Authorization': `token ${config.ghToken}`,
+        'Authorization': 'token ' + config.ghToken,
         'Accept': 'application/vnd.github.v3+json'
       }
     });
@@ -816,7 +816,7 @@ async function syncToGitHub() {
     await fetch(url, {
       method: 'PUT',
       headers: {
-        'Authorization': `token ${config.ghToken}`,
+        'Authorization': 'token ' + config.ghToken,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json'
       },
@@ -886,7 +886,7 @@ function updateStats() {
 }
 
 
-// ── SCHEDULES CONFIG ──────────────────────
+// -- SCHEDULES CONFIG ----------------------
 let remoteSchedules = [];
 
 async function loadSchedules() {
@@ -894,7 +894,7 @@ async function loadSchedules() {
   try {
     const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
     const res = await fetch(url, {
-      headers: { 'Authorization': `token ${config.ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+      headers: { 'Authorization': 'token ' + config.ghToken, 'Accept': 'application/vnd.github.v3+json' }
     });
     if (!res.ok) return;
     const data = await res.json();
@@ -910,7 +910,7 @@ async function saveSchedules() {
   try {
     const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
     const getRes = await fetch(url, {
-      headers: { 'Authorization': `token ${config.ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+      headers: { 'Authorization': 'token ' + config.ghToken, 'Accept': 'application/vnd.github.v3+json' }
     });
     const getData = await getRes.json();
     const content = Buffer ? 
@@ -918,7 +918,7 @@ async function saveSchedules() {
       btoa(unescape(encodeURIComponent(JSON.stringify({ schedules: remoteSchedules }, null, 2))));
     await fetch(url, {
       method: 'PUT',
-      headers: { 'Authorization': `token ${config.ghToken}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'token ' + config.ghToken, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: 'TaskMail: mise à jour des horaires', content, sha: getData.sha })
     });
     toast('Horaires sauvegardés', 'ok');
