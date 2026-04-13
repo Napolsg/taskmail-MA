@@ -479,6 +479,15 @@ html, body {
     </div>
   </div>
   <button class="sheet-btn btn-blue" onclick="saveConfig()">Sauvegarder</button>
+
+  <div class="sheet-group-label">Horaires d'envoi (heure de Paris)</div>
+  <div class="sheet-group">
+    <div id="schedule-chips" style="display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px;"></div>
+    <div style="display:flex; gap:8px; padding:0 14px 12px;">
+      <input type="time" id="new-schedule" value="08:00" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:var(--r-sm); padding:9px 12px; font-family:var(--mono); font-size:0.85rem; color:var(--text); outline:none;">
+      <button onclick="addScheduleConfig()" style="background:var(--text); color:white; border:none; border-radius:var(--r-sm); padding:9px 16px; font-family:var(--font); font-size:0.85rem; font-weight:700; cursor:pointer;">Ajouter</button>
+    </div>
+  </div>
 </div>
 
 <!-- EDIT OVERLAY -->
@@ -878,11 +887,78 @@ function updateStats() {
   const _sh2 = document.getElementById('s-high'); if(_sh2) _sh2.textContent = tasks.filter(t => t.priority==='high' && !t.done).length;
 }
 
+
+// ── SCHEDULES CONFIG ──────────────────────
+let remoteSchedules = [];
+
+async function loadSchedules() {
+  if (!config.ghToken) return;
+  try {
+    const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
+    const res = await fetch(url, {
+      headers: { 'Authorization': `token ${config.ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const bytes = Uint8Array.from(atob(data.content.replace(/\s/g, '')), ch => ch.charCodeAt(0));
+    const cfg = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    remoteSchedules = cfg.schedules || [];
+    renderScheduleChipsConfig();
+  } catch(e) { console.warn('Chargement config échoué:', e.message); }
+}
+
+async function saveSchedules() {
+  if (!config.ghToken) { toast('Token GitHub requis', 'err'); return; }
+  try {
+    const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
+    const getRes = await fetch(url, {
+      headers: { 'Authorization': `token ${config.ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    const getData = await getRes.json();
+    const content = Buffer ? 
+      Buffer.from(JSON.stringify({ schedules: remoteSchedules }, null, 2)).toString('base64') :
+      btoa(unescape(encodeURIComponent(JSON.stringify({ schedules: remoteSchedules }, null, 2))));
+    await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${config.ghToken}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'TaskMail: mise à jour des horaires', content, sha: getData.sha })
+    });
+    toast('Horaires sauvegardés', 'ok');
+  } catch(e) { toast('Erreur: ' + e.message, 'err'); }
+}
+
+function addScheduleConfig() {
+  const v = document.getElementById('new-schedule').value;
+  if (!v || remoteSchedules.includes(v)) { if (remoteSchedules.includes(v)) toast('Déjà ajouté', 'info'); return; }
+  remoteSchedules.push(v); remoteSchedules.sort();
+  renderScheduleChipsConfig();
+  saveSchedules();
+}
+
+function removeScheduleConfig(v) {
+  remoteSchedules = remoteSchedules.filter(s => s !== v);
+  renderScheduleChipsConfig();
+  saveSchedules();
+}
+
+function renderScheduleChipsConfig() {
+  const el = document.getElementById('schedule-chips');
+  if (!el) return;
+  if (!remoteSchedules.length) { el.innerHTML = '<span style="font-size:0.78rem;color:var(--muted)">Aucun horaire</span>'; return; }
+  el.innerHTML = remoteSchedules.map(s => `
+    <div style="display:flex;align-items:center;gap:5px;background:var(--accent-bg);border:1.5px solid var(--accent);border-radius:20px;padding:5px 10px;font-family:var(--mono);font-size:0.78rem;color:var(--accent);">
+      ${s}
+      <button onclick="removeScheduleConfig('${s}')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.8rem;opacity:0.7;padding:0;">✕</button>
+    </div>
+  `).join('');
+}
+
 function render() { renderTasks(); updateStats(); renderChips(); renderLog(); updateNextSend(); }
 
 function openSettings() {
   document.getElementById('s-overlay').classList.add('open');
   document.getElementById('s-sheet').classList.add('open');
+  loadSchedules();
 }
 function closeSettings() {
   document.getElementById('s-overlay').classList.remove('open');
