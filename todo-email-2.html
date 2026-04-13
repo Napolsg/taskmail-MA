@@ -412,7 +412,7 @@ html, body {
   <div class="header-top">
     <div style="display:flex; align-items:baseline; gap:8px;">
       <div class="app-title">TaskMail</div>
-      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.4</span>
+      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.8</span>
     </div>
     <div class="header-actions">
       <button class="hbtn" onclick="openSettings()">⚙️</button>
@@ -454,6 +454,7 @@ html, body {
       <option value="low">🟢 Faible</option>
     </select>
     <input class="add-sel" type="text" id="new-project" placeholder="Projet…" style="font-size:0.82rem">
+    <input class="add-sel" type="email" id="new-assignee" placeholder="Assigner à…" style="font-size:0.82rem">
   </div>
 </div>
 
@@ -466,22 +467,16 @@ html, body {
     <button class="sheet-close" onclick="closeSettings()">✕</button>
   </div>
 
-  <div class="sheet-group-label">Email</div>
-  <div class="sheet-group">
-    <div class="sheet-row">
-      <label>Adresse destinataire</label>
-      <input class="sheet-input" type="email" id="ejs-to" placeholder="toi@exemple.com">
-    </div>
-  </div>
+
 
   <div class="sheet-group-label">GitHub</div>
-  <div class="sheet-group">
+  <div class="sheet-group" id="token-box">
     <div class="sheet-row">
       <label>Token GitHub</label>
       <input class="sheet-input" type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
     </div>
   </div>
-  <button class="sheet-btn btn-blue" onclick="saveConfig()">Sauvegarder</button>
+  <button class="sheet-btn btn-blue" id="save-btn" onclick="saveConfig()">Sauvegarder</button>
 
   <div class="sheet-group-label">Horaires d'envoi (heure de Paris)</div>
   <div class="sheet-group">
@@ -531,6 +526,7 @@ let tasks     = JSON.parse(localStorage.getItem('tm3_tasks')     || '[]');
 let schedules = JSON.parse(localStorage.getItem('tm3_schedules') || '["08:00","18:00"]');
 let config    = JSON.parse(localStorage.getItem('tm3_config')    || '{}');
 let log       = JSON.parse(localStorage.getItem('tm3_log')       || '[]');
+let deleted   = new Set(JSON.parse(localStorage.getItem('tm3_deleted') || '[]'));
 let filter    = 'all';
 let editingId = null;
 let lastMin   = null;
@@ -607,13 +603,12 @@ async function syncFromGitHub(notify = false) {
     const localIds  = new Set(tasks.map(t => String(t.id)));
     const remoteIds = new Set(remote.map(t => String(t.id)));
 
-    const newFromRemote = remote.filter(t => !localIds.has(String(t.id)));
+    // Ignore les tâches supprimées localement
+    const newFromRemote = remote.filter(t => !localIds.has(String(t.id)) && !deleted.has(String(t.id)));
     const onlyLocal     = tasks.filter(t => !remoteIds.has(String(t.id)));
 
     if (newFromRemote.length > 0 || onlyLocal.length > 0) {
-      // Merge : tâches GitHub + tâches locales non encore sur GitHub
       const merged = [...newFromRemote, ...tasks];
-      // Dédoublonne par id
       const seen = new Set();
       tasks = merged.filter(t => { const k = String(t.id); if (seen.has(k)) return false; seen.add(k); return true; });
       localStorage.setItem('tm3_tasks', JSON.stringify(tasks));
@@ -653,11 +648,36 @@ function sanitize(str) {
 
 function saveConfig() {
   config = {
-    to:      sanitize(document.getElementById('ejs-to')   ? document.getElementById('ejs-to').value   : (config.to || '')),
     ghToken: sanitize(document.getElementById('gh-token') ? document.getElementById('gh-token').value : (config.ghToken || '')),
   };
   localStorage.setItem('tm3_config', JSON.stringify(config));
   toast('Configuration sauvegardée', 'ok');
+  updateTokenUI();
+}
+
+function updateTokenUI() {
+  const box  = document.getElementById('token-box');
+  const btn  = document.getElementById('save-btn');
+  if (!box || !btn) return;
+  if (config.ghToken) {
+    box.style.display = 'none';
+    btn.textContent = 'Changer le token';
+    btn.onclick = showTokenInput;
+  } else {
+    box.style.display = 'block';
+    btn.textContent = 'Sauvegarder';
+    btn.onclick = saveConfig;
+  }
+}
+
+function showTokenInput() {
+  const box = document.getElementById('token-box');
+  const btn = document.getElementById('save-btn');
+  if (!box || !btn) return;
+  box.style.display = 'block';
+  document.getElementById('gh-token').value = '';
+  btn.textContent = 'Sauvegarder';
+  btn.onclick = saveConfig;
 }
 
 function sendMailto() {
@@ -750,9 +770,10 @@ function renderChips() {
 function addTask() {
   const title = document.getElementById('new-title').value.trim();
   if (!title) return;
-  tasks.unshift({ id:Date.now(), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), done:false, created:new Date().toISOString() });
+  tasks.unshift({ id:Date.now(), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), assignee:document.getElementById('new-assignee').value.trim(), done:false, created:new Date().toISOString() });
   document.getElementById('new-title').value = '';
   document.getElementById('new-project').value = '';
+  document.getElementById('new-assignee').value = '';
   save(); renderTasks(); updateStats(); tickClock();
 }
 
@@ -768,6 +789,7 @@ function openEdit(id) {
   document.getElementById('e-title').value    = t.title;
   document.getElementById('e-priority').value = t.priority;
   document.getElementById('e-project').value  = t.project || '';
+  document.getElementById('e-assignee').value = t.assignee || '';
   document.getElementById('e-overlay').classList.add('open');
   document.getElementById('e-sheet').classList.add('open');
 }
@@ -784,11 +806,14 @@ function saveEdit() {
   t.title    = document.getElementById('e-title').value.trim() || t.title;
   t.priority = document.getElementById('e-priority').value;
   t.project  = document.getElementById('e-project').value.trim();
+  t.assignee = document.getElementById('e-assignee').value.trim();
   save(); renderTasks(); updateStats(); closeEdit();
   toast('Tâche mise à jour', 'ok');
 }
 
 function deleteEdit() {
+  deleted.add(String(editingId));
+  localStorage.setItem('tm3_deleted', JSON.stringify([...deleted]));
   tasks = tasks.filter(t => t.id!==editingId);
   save(); renderTasks(); updateStats(); tickClock(); closeEdit();
   toast('Tâche supprimée', 'info');
@@ -877,6 +902,7 @@ function renderTasks() {
       <div class="task-body" onclick="openEdit(${t.id})">
         <div class="task-title">${esc(t.title)}</div>
         ${t.project ? `<div class="task-project">${esc(t.project)}</div>` : ''}
+        ${t.assignee ? `<div class="task-project" style="color:#2D5BE3;">→ ${esc(t.assignee)}</div>` : ''}
       </div>
       <button class="edit-btn" onclick="openEdit(${t.id})">✎</button>
     </div>
@@ -961,6 +987,7 @@ function render() { renderTasks(); updateStats(); renderChips(); renderLog(); up
 function openSettings() {
   document.getElementById('s-overlay').classList.add('open');
   document.getElementById('s-sheet').classList.add('open');
+  updateTokenUI();
   loadSchedules();
 }
 function closeSettings() {
