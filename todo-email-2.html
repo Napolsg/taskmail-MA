@@ -482,10 +482,10 @@ html, body {
 
   <div class="sheet-group-label">Horaires d'envoi (heure de Paris)</div>
   <div class="sheet-group">
-    <div id="schedule-chips" style="display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px;"></div>
-    <div style="display:flex; gap:8px; padding:0 14px 12px;">
-      <input type="time" id="new-schedule" value="08:00" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:var(--r-sm); padding:9px 12px; font-family:var(--mono); font-size:0.85rem; color:var(--text); outline:none;">
-      <button onclick="addScheduleConfig()" style="background:var(--text); color:white; border:none; border-radius:var(--r-sm); padding:9px 16px; font-family:var(--font); font-size:0.85rem; font-weight:700; cursor:pointer;">Ajouter</button>
+    <div id="schedule-chips" style="display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; min-height:20px;"></div>
+    <div style="display:flex; gap:8px; padding:0 14px 12px; align-items:center;">
+      <input type="time" id="new-schedule" value="08:00" style="flex:1; background:#F2F2F7; border:1px solid #E8E8E4; border-radius:9px; padding:9px 12px; font-size:0.85rem; color:#1C1C1E; outline:none;">
+      <button onclick="addScheduleConfig()" style="background:#1C1C1E; color:white; border:none; border-radius:9px; padding:9px 16px; font-size:0.85rem; font-weight:700; cursor:pointer; white-space:nowrap;">Ajouter</button>
     </div>
   </div>
 </div>
@@ -944,11 +944,14 @@ function removeScheduleConfig(v) {
 function renderScheduleChipsConfig() {
   const el = document.getElementById('schedule-chips');
   if (!el) return;
-  if (!remoteSchedules.length) { el.innerHTML = '<span style="font-size:0.78rem;color:var(--muted)">Aucun horaire</span>'; return; }
+  if (!remoteSchedules.length) {
+    el.innerHTML = '<span style="font-size:0.78rem;color:#8E8E93;">Aucun horaire</span>';
+    return;
+  }
   el.innerHTML = remoteSchedules.map(s => `
-    <div style="display:flex;align-items:center;gap:5px;background:var(--accent-bg);border:1.5px solid var(--accent);border-radius:20px;padding:5px 10px;font-family:var(--mono);font-size:0.78rem;color:var(--accent);">
-      ${s}
-      <button onclick="removeScheduleConfig('${s}')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.8rem;opacity:0.7;padding:0;">✕</button>
+    <div style="display:inline-flex;align-items:center;gap:5px;background:#EEF2FD;border:1.5px solid #2D5BE3;border-radius:20px;padding:5px 10px;font-size:0.78rem;color:#2D5BE3;">
+      <span style="font-family:monospace;">${s}</span>
+      <button onclick="removeScheduleConfig('${s}')" style="background:none;border:none;color:#2D5BE3;cursor:pointer;font-size:0.8rem;opacity:0.7;padding:0;line-height:1;">✕</button>
     </div>
   `).join('');
 }
