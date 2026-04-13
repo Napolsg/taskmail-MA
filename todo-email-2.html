@@ -412,7 +412,7 @@ html, body {
   <div class="header-top">
     <div style="display:flex; align-items:baseline; gap:8px;">
       <div class="app-title">TaskMail</div>
-      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.9</span>
+      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v2.5</span>
     </div>
     <div class="header-actions">
       <button class="hbtn" onclick="openSettings()">⚙️</button>
@@ -453,8 +453,8 @@ html, body {
       <option value="high">🔴 Urgent</option>
       <option value="low">🟢 Faible</option>
     </select>
-    <input class="add-sel" type="text" id="new-project" placeholder="Projet…" style="font-size:0.82rem">
-    <input class="add-sel" type="email" id="new-assignee" placeholder="Assigner à…" style="font-size:0.82rem">
+    <input class="add-sel" type="text" id="new-project" placeholder="Projet…" style="font-size:0.82rem; flex:1; min-width:0;">
+    <select class="add-sel" id="new-assignee" style="font-size:0.82rem; flex:1; min-width:0;" onchange="onAssigneeChange(this)"></select>
   </div>
 </div>
 
@@ -507,7 +507,15 @@ html, body {
       </select>
     </div>
     <div class="sheet-row"><label>Projet</label><input class="sheet-input" type="text" id="e-project" placeholder="Nom du projet"></div>
-    <div class="sheet-row"><label>Assigner à (email)</label><input class="sheet-input" type="email" id="e-assignee" placeholder="email@exemple.com"></div>
+    <div class="sheet-row" style="gap:6px;">
+      <label>Assigner à</label>
+      <select class="sheet-input" id="e-assignee" style="padding:6px 8px;" onchange="onAssigneeChange(this)"></select>
+    </div>
+    <div id="new-contact-form" style="display:none; padding:10px 14px; background:#F2F2F7; border-radius:8px; margin:0 0 8px; gap:6px; flex-direction:column;">
+      <input class="sheet-input" type="text" id="contact-name" placeholder="Nom du contact" style="margin-bottom:4px;">
+      <input class="sheet-input" type="email" id="contact-email" placeholder="email@exemple.com">
+      <button onclick="saveNewContact()" style="background:#1C1C1E;color:white;border:none;border-radius:8px;padding:8px;font-size:0.82rem;font-weight:700;cursor:pointer;margin-top:2px;">Ajouter le contact</button>
+    </div>
   </div>
   <button class="sheet-btn btn-blue" onclick="saveEdit()">Enregistrer</button>
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
@@ -528,6 +536,7 @@ let schedules = JSON.parse(localStorage.getItem('tm3_schedules') || '["08:00","1
 let config    = JSON.parse(localStorage.getItem('tm3_config')    || '{}');
 let log       = JSON.parse(localStorage.getItem('tm3_log')       || '[]');
 let deleted   = new Set(JSON.parse(localStorage.getItem('tm3_deleted') || '[]'));
+let contacts  = JSON.parse(localStorage.getItem('tm3_contacts') || '[]');
 let filter    = 'all';
 let editingId = null;
 let lastMin   = null;
@@ -771,7 +780,7 @@ function renderChips() {
 function addTask() {
   const title = document.getElementById('new-title').value.trim();
   if (!title) return;
-  tasks.unshift({ id:Date.now(), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), assignee:document.getElementById('new-assignee').value.trim(), done:false, created:new Date().toISOString() });
+  tasks.unshift({ id:Date.now(), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), assignee:getAssigneeEmail(document.getElementById('new-assignee').value), done:false, created:new Date().toISOString() });
   document.getElementById('new-title').value = '';
   document.getElementById('new-project').value = '';
   document.getElementById('new-assignee').value = '';
@@ -790,7 +799,20 @@ function openEdit(id) {
   document.getElementById('e-title').value    = t.title;
   document.getElementById('e-priority').value = t.priority;
   document.getElementById('e-project').value  = t.project || '';
-  document.getElementById('e-assignee').value = t.assignee || '';
+  populateAssigneeSelects();
+  const eAssign = document.getElementById('e-assignee');
+  if (eAssign) {
+    eAssign.value = t.assignee || '';
+    if (!eAssign.value && t.assignee) {
+      // email non trouvé dans les contacts — l'ajoute temporairement
+      const opt = document.createElement('option');
+      opt.value = t.assignee; opt.textContent = t.assignee;
+      eAssign.insertBefore(opt, eAssign.lastElementChild);
+      eAssign.value = t.assignee;
+    }
+  }
+  const form = document.getElementById('new-contact-form');
+  if (form) form.style.display = 'none';
   document.getElementById('e-overlay').classList.add('open');
   document.getElementById('e-sheet').classList.add('open');
 }
@@ -807,7 +829,7 @@ function saveEdit() {
   t.title    = document.getElementById('e-title').value.trim() || t.title;
   t.priority = document.getElementById('e-priority').value;
   t.project  = document.getElementById('e-project').value.trim();
-  t.assignee = document.getElementById('e-assignee').value.trim();
+  t.assignee = getAssigneeEmail(document.getElementById('e-assignee')?.value || '');
   save(); renderTasks(); updateStats(); closeEdit();
   toast('Tâche mise à jour', 'ok');
 }
@@ -983,13 +1005,68 @@ function renderScheduleChipsConfig() {
   `).join('');
 }
 
-function render() { renderTasks(); updateStats(); renderChips(); renderLog(); updateNextSend(); }
+
+// ── CONTACTS ──────────────────────────────
+function saveContacts() {
+  localStorage.setItem('tm3_contacts', JSON.stringify(contacts));
+}
+
+function populateAssigneeSelects() {
+  const opts = `<option value="">-- Personne --</option>
+    <option value="__me__">Moi</option>
+    ${contacts.map(ct => `<option value="${ct.email}">${ct.name} (${ct.email})</option>`).join('')}
+    <option value="__new__">+ Nouveau contact</option>`;
+  ['new-assignee', 'e-assignee'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+}
+
+function onAssigneeChange(sel) {
+  const form = document.getElementById('new-contact-form');
+  if (!sel || !form) return;
+  if (sel.value === '__new__') {
+    form.style.display = 'flex';
+    form.style.flexDirection = 'column';
+    // Stocke quel select a déclenché pour savoir où mettre le résultat
+    form.dataset.triggeredBy = sel.id;
+  } else {
+    form.style.display = 'none';
+  }
+}
+
+function saveNewContact() {
+  const name  = (document.getElementById('contact-name')?.value || '').trim();
+  const email = (document.getElementById('contact-email')?.value || '').trim();
+  if (!name || !email) { toast('Nom et email requis', 'err'); return; }
+  if (contacts.find(c => c.email === email)) { toast('Contact déjà existant', 'info'); return; }
+  contacts.push({ name, email });
+  saveContacts();
+  populateAssigneeSelects();
+  // Sélectionne le nouveau contact dans le bon select
+  const form = document.getElementById('new-contact-form');
+  const triggeredBy = form?.dataset.triggeredBy || 'e-assignee';
+  const sel = document.getElementById(triggeredBy);
+  if (sel) sel.value = email;
+  if (form) form.style.display = 'none';
+  toast('Contact ' + name + ' ajouté', 'ok');
+}
+
+function getAssigneeEmail(val) {
+  if (!val || val === '--') return '';
+  if (val === '__me__') return config.ownerEmail || '';
+  if (val === '__new__') return '';
+  return val;
+}
+
+function render() { renderTasks(); updateStats(); renderChips(); renderLog(); updateNextSend(); populateAssigneeSelects(); }
 
 function openSettings() {
   document.getElementById('s-overlay').classList.add('open');
   document.getElementById('s-sheet').classList.add('open');
   updateTokenUI();
   loadSchedules();
+  populateAssigneeSelects();
 }
 function closeSettings() {
   document.getElementById('s-overlay').classList.remove('open');
