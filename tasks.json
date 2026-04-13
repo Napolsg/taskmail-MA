@@ -1,5 +1,16 @@
 [
   {
+    "id": 1776087207057,
+    "title": "La vie",
+    "priority": "medium",
+    "project": "",
+    "assignee": "",
+    "assigneeRef": "",
+    "done": false,
+    "created": "2026-04-13T13:33:27.057Z",
+    "assignedBy": "taskmail"
+  },
+  {
     "id": 1776074418083.4592,
     "title": "Faire deux taches",
     "priority": "medium",
@@ -29,6 +40,6 @@
     "assignee": "",
     "done": false,
     "created": "2026-04-13T12:21:27.641Z",
-    "assigneeRef": ""
+    "assigneeRef": "__me__"
   }
 ]
