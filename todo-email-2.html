@@ -412,7 +412,7 @@ html, body {
   <div class="header-top">
     <div style="display:flex; align-items:baseline; gap:8px;">
       <div class="app-title">TaskMail</div>
-      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.3</span>
+      <span style="font-size:0.7rem; color:#8E8E93; font-family:monospace;">v1.4</span>
     </div>
     <div class="header-actions">
       <button class="hbtn" onclick="openSettings()">⚙️</button>
@@ -917,9 +917,7 @@ async function saveSchedules() {
       headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' }
     });
     const getData = await getRes.json();
-    const content = Buffer ? 
-      Buffer.from(JSON.stringify({ schedules: remoteSchedules }, null, 2)).toString('base64') :
-      btoa(unescape(encodeURIComponent(JSON.stringify({ schedules: remoteSchedules }, null, 2))));
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify({ schedules: remoteSchedules }, null, 2))));
     await fetch(url, {
       method: 'PUT',
       headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
