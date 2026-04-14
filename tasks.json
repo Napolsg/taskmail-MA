@@ -1,26 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1776176224618,
-      "title": "Kikou",
-      "priority": "medium",
-      "project": "",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__",
-      "done": true,
-      "created": "2026-04-14T14:17:04.618Z"
-    },
-    {
-      "id": 1776174978021,
-      "title": "Nouveau",
-      "priority": "medium",
-      "project": "",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__",
-      "done": true,
-      "created": "2026-04-14T13:56:18.021Z"
-    },
-    {
       "id": 1776094941163,
       "title": "Être gentille",
       "priority": "high",
@@ -84,6 +64,8 @@
     "1776171752851",
     "1776171485424",
     "1776170687814",
-    "1776168941304"
+    "1776168941304",
+    "1776176224618",
+    "1776174978021"
   ]
 }
