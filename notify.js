@@ -19,7 +19,7 @@ const dateStr = now.toLocaleString('fr-FR', {
   hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris'
 });
 
-const APP_URL = process.env.APP_URL || 'https://napolsg.github.io/taskmail/todo-email.html';
+const APP_URL = process.env.APP_URL || 'https://napolsg.github.io/taskmail-MA/todo-email-2.html';
 
 function buildHTML(task, type) {
   const isAssigned  = type === 'assigned';
