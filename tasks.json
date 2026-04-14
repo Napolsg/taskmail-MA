@@ -1,6 +1,26 @@
 {
   "tasks": [
     {
+      "id": 1776170687814,
+      "title": "Faire la vaisselle",
+      "priority": "medium",
+      "project": "",
+      "assignee": "taskmail",
+      "assigneeRef": "__contact_0__",
+      "done": false,
+      "created": "2026-04-14T12:44:47.814Z"
+    },
+    {
+      "id": 1776168941304,
+      "title": "Napo",
+      "priority": "medium",
+      "project": "",
+      "assignee": "taskmail",
+      "assigneeRef": "__contact_0__",
+      "done": true,
+      "created": "2026-04-14T12:15:41.304Z"
+    },
+    {
       "id": 1776094941163,
       "title": "Être gentille",
       "priority": "high",
@@ -9,16 +29,6 @@
       "assigneeRef": "__me__",
       "done": false,
       "created": "2026-04-13T15:42:21.163Z"
-    },
-    {
-      "id": 1776090794929,
-      "title": "Appeler Engie oh oui 🤗",
-      "priority": "high",
-      "project": "",
-      "assignee": "taskmail",
-      "assigneeRef": "__contact_0__",
-      "done": false,
-      "created": "2026-04-13T14:33:14.929Z"
     }
   ],
   "deletedIds": [
@@ -66,6 +76,7 @@
     "1776098355238.724",
     "1776100613671.0974",
     "1776100613671.4893",
-    "1776100433211.909"
+    "1776100433211.909",
+    "1776090794929"
   ]
 }
