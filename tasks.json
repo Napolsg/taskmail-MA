@@ -1,6 +1,17 @@
 {
   "tasks": [
     {
+      "id": 1776250692899,
+      "title": "Demander les dispos aux parents",
+      "priority": "high",
+      "project": "Anniversaire Côme",
+      "assignee": "",
+      "assigneeRef": "",
+      "done": false,
+      "created": "2026-04-15T10:58:12.899Z",
+      "assignedBy": "taskmail"
+    },
+    {
       "id": 1776250627649,
       "title": "Cadeau Tristan",
       "priority": "medium",
