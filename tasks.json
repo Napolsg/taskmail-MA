@@ -30,7 +30,9 @@
       "priority": "medium",
       "project": "",
       "done": false,
-      "created": "2026-04-15T10:45:22.973Z"
+      "created": "2026-04-15T10:45:22.973Z",
+      "assignee": "l.lassus87@gmail.com",
+      "assigneeRef": "__contact_0__"
     },
     {
       "id": 1776094941163,
