@@ -25,16 +25,6 @@
       "created": "2026-04-15T10:45:22.973Z"
     },
     {
-      "id": 1776249923637,
-      "title": "Marie-Alix de Lassus",
-      "priority": "medium",
-      "project": "",
-      "done": true,
-      "created": "2026-04-15T10:45:22.973Z",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__"
-    },
-    {
       "id": 1776094941163,
       "title": "Être gentille",
       "priority": "high",
@@ -113,6 +103,7 @@
     "1776178792543",
     "1776178350835",
     "1776179914968",
-    "1776233788860"
+    "1776233788860",
+    "1776249923637"
   ]
 }
