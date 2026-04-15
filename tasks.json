@@ -1,12 +1,14 @@
 {
   "tasks": [
     {
-      "id": 1776290885202,
-      "title": "Aller voir sa femme qui vient de rentrer plutôt que la TDB",
+      "id": 1776290918941,
+      "title": "Aller voir sa femme plutôt que la TDB",
       "priority": "medium",
       "project": "",
+      "assignee": "",
+      "assigneeRef": "",
       "done": false,
-      "created": "2026-04-15T22:08:04.976Z"
+      "created": "2026-04-15T22:08:38.941Z"
     },
     {
       "id": 1776250692899,
