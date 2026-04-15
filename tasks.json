@@ -1,16 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1776233788860,
-      "title": "Coucou20",
-      "priority": "medium",
-      "project": "",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__",
-      "done": true,
-      "created": "2026-04-15T06:16:28.860Z"
-    },
-    {
       "id": 1776094941163,
       "title": "Être gentille",
       "priority": "high",
@@ -88,6 +78,7 @@
     "1776179260479",
     "1776178792543",
     "1776178350835",
-    "1776179914968"
+    "1776179914968",
+    "1776233788860"
   ]
 }
